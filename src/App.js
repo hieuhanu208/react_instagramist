@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import Wrapper from "./component/Wrapper";
 import "./App.css";
 import Post from "./component/Post";
 import { db, auth } from "./firebase";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button, Input } from "@material-ui/core";
+import ImageUpload from "./component/ImageUpload";
+import InstagramEmbed from 'react-instagram-embed';
 
 function getModalStyle() {
   const top = 50;
@@ -38,7 +39,7 @@ function App() {
   const [username, setUsername] = useState([]);
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [openSignIn, setOpenSignIn ] = useState(false);
+  const [openSignIn, setOpenSignIn] = useState(false);
 
   useEffect(() => {
     const unsubcriber = auth.onAuthStateChanged((authUser) => {
@@ -58,14 +59,16 @@ function App() {
   }, [user, username]);
 
   useEffect(() => {
-    db.collection("posts").onSnapshot((snapshot) => {
-      setPost(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          post: doc.data(),
-        }))
-      );
-    });
+    db.collection("posts")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+        setPost(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            post: doc.data(),
+          }))
+        );
+      });
   }, []);
 
   const signUp = (e) => {
@@ -84,13 +87,14 @@ function App() {
 
   const signIn = (e) => {
     e.preventDefault();
-    auth.signInWithEmailAndPassword(email,password)
-    .catch((error) => alert(error.message))
-  }
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .catch((error) => alert(error.message));
+  };
 
   return (
     <div className="app">
-       <Modal open={openSignIn} onClose={() => setOpenSignIn(false)}>
+      <Modal open={openSignIn} onClose={() => setOpenSignIn(false)}>
         <div style={modalStyle} className={classes.paper}>
           <form className="app__signup">
             <center>
@@ -156,19 +160,19 @@ function App() {
           className="app__headerImage"
           src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
         />
-      </div>
-      {user ? (
-        
+         {user ? (
         <Button onClick={() => auth.signOut()}>Logout</Button>
       ) : (
         <div className="app__loginContainer">
-           <Button onClick={() => setOpenSignIn(true)}>Sign in</Button>
-           <Button onClick={() => setOpen(true)}>Sign up</Button>
+          <Button onClick={() => setOpenSignIn(true)}>Sign in</Button>
+          <Button onClick={() => setOpen(true)}>Sign up</Button>
         </div>
-       
       )}
+      </div>
 
-      {posts.map(({ post, id }) => (
+      <div className="app__posts">
+        <div className="app__postsLeft">
+        {posts.map(({ post, id }) => (
         <Post
           key={id}
           username={post.username}
@@ -176,6 +180,28 @@ function App() {
           imageUrl={post.imageUrl}
         />
       ))}
+        </div>
+        <div className="app__postsRight">
+        <InstagramEmbed
+        url='https://instagr.am/p/Zw9o4/'
+        maxWidth={320}
+        hideCaption={false}
+        containerTagName='div'
+        protocol=''
+        injectScript
+        onLoading={() => {}}
+        onSuccess={() => {}}
+        onAfterRender={() => {}}
+        onFailure={() => {}}
+      />
+        </div>
+     
+      </div>
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName} />
+      ) : (
+        <h3>Sorry you need to login</h3>
+      )}
     </div>
   );
 }

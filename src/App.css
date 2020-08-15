@@ -8,11 +8,32 @@
  background-color: #fff;
  padding: 20px;
  border-bottom: 1px solid lightgray;
+ display: flex;
+ justify-content: space-between;
  
 }
 .app__header img{
+  object-fit: contain;
   height: 29px;
  width: 103px;
+}
+
+.app__posts {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.app__postsRight {
+  position: fixed;
+  left: 1134.5px;
+  background-color: rgba(var(--b3f,250,250,250),1);
+  margin: 0 0 12px -16px;
+  width: calc(100% + 32px);
+}
+
+.app__postsLeft {
+  margin-right: 13%;
 }
 img.app__headerImage {
   width: 109px;
